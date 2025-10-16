@@ -306,10 +306,11 @@ export default function MeetingsPage() {
     <DashboardLayout>
       <div className="flex flex-col space-y-6 min-h-0">
         {/* ヘッダー */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 flex-shrink-0">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">面談記録</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
+            <h1 className="text-2xl font-semibold text-text mb-2">面談記録</h1>
+            <p className="text-sm text-text-light mb-1">面談内容を確実に記録しましょう</p>
+            <p className="text-xs text-text-light">
               {sortedMeetings.length}件の面談記録
             </p>
           </div>
@@ -423,41 +424,17 @@ export default function MeetingsPage() {
                   <p className="text-gray-600 dark:text-gray-400">{meeting.summary}</p>
                 </div>
 
-                {/* 次回アクション */}
-                {meeting.nextAction && (
-                  <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                    <h4 className="font-medium text-blue-900 dark:text-blue-200 mb-1">次回アクション</h4>
-                    <p className="text-blue-800 dark:text-blue-300">
-                      {meeting.nextAction}
-                      {meeting.nextActionDate && (
-                        <span className="ml-2 text-blue-600 dark:text-blue-400">
-                          (期限: {meeting.nextActionDate})
-                        </span>
-                      )}
-                    </p>
+                {/* 添付ファイル */}
+                {meeting.attachments.length > 0 && (
+                  <div className="flex items-center space-x-2">
+                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                    </svg>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                      {meeting.attachments.length}個のファイル
+                    </span>
                   </div>
                 )}
-
-                {/* タグと添付ファイル */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                  <div className="flex flex-wrap gap-1">
-                    {meeting.tags.map((tag, index) => (
-                      <Badge key={index} variant="secondary" size="sm">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                  {meeting.attachments.length > 0 && (
-                    <div className="flex items-center space-x-2">
-                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                      </svg>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">
-                        {meeting.attachments.length}個のファイル
-                      </span>
-                    </div>
-                  )}
-                </div>
               </div>
             </Card>
           ))}

@@ -12,6 +12,78 @@ export default function SnippetsPage() {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedSnippet, setSelectedSnippet] = useState<number | null>(null);
 
+  // 選択中のスニペットのモックデータ
+  const selectedSnippetMockData = {
+    id: 1,
+    title: '提案書基本フォーマット',
+    category: '提案書',
+    content: `【提案書】
+
+件名：{{プロジェクト名}}
+提出日：{{日付}}
+提出先：{{顧客名}} 御中
+
+1. 提案の背景と目的
+{{背景と目的}}
+
+2. 現状の課題
+{{課題}}
+
+3. 解決策の提案
+{{解決策}}
+
+4. 期待される効果
+{{効果}}
+
+5. 実施スケジュール
+{{スケジュール}}
+
+6. 費用見積
+{{見積}}
+
+7. 実施体制
+{{体制}}
+
+8. リスクと対策
+{{リスク対策}}
+
+以上`,
+    variables: [
+      { name: 'プロジェクト名', description: 'プロジェクトの正式名称' },
+      { name: '日付', description: '提案書の提出日（YYYY年MM月DD日）' },
+      { name: '顧客名', description: '顧客の会社名' },
+      { name: '背景と目的', description: 'プロジェクトの背景と目的' },
+      { name: '課題', description: '現状の課題と問題点' },
+      { name: '解決策', description: '提案する解決策の詳細' },
+      { name: '効果', description: '期待される効果や成果' },
+      { name: 'スケジュール', description: '実施スケジュールの詳細' },
+      { name: '見積', description: '費用の見積もり' },
+      { name: '体制', description: 'プロジェクトの実施体制' },
+      { name: 'リスク対策', description: '想定されるリスクと対策' }
+    ],
+    examples: [
+      {
+        title: 'DX推進プロジェクト提案書',
+        replacements: {
+          'プロジェクト名': 'DX推進プロジェクト',
+          '日付': '2024年1月15日',
+          '顧客名': '株式会社テクノロジー',
+          '背景と目的': '御社のDX推進による業務効率化と顧客満足度向上',
+          '課題': '現状の手作業による非効率な業務プロセス',
+          '解決策': 'AI/RPA導入による自動化と業務プロセスの最適化',
+          '効果': '業務効率30%向上、顧客対応時間50%短縮',
+          'スケジュール': '3ヶ月間での段階的な導入',
+          '見積': '初期費用300万円、運用費用月額10万円',
+          '体制': 'PM1名、エンジニア2名、コンサルタント1名',
+          'リスク対策': '段階的な導入によるリスク最小化'
+        }
+      }
+    ],
+    lastModified: '2024-01-15 14:30',
+    createdBy: '乘松 利奈',
+    version: '1.2'
+  };
+
   // サンプルデータ
   const snippets = [
     {
@@ -432,23 +504,24 @@ export default function SnippetsPage() {
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col h-[calc(100vh-2rem)] py-4">
         {/* ヘッダー */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">文章クリップ</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
+            <h1 className="text-2xl font-semibold text-text mb-2">文章クリップ</h1>
+            <p className="text-sm text-text-light mb-1">よく使う文章を保存して効率的に活用しましょう</p>
+            <p className="text-xs text-text-light">
               {filteredSnippets.length}件の文章クリップ
             </p>
           </div>
           <div className="flex space-x-3">
-            <Button variant="outline">
+            <Button variant="outline" size="sm">
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
               エクスポート
             </Button>
-            <Button variant="outline">
+            <Button variant="outline" size="sm">
               <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
@@ -458,7 +531,7 @@ export default function SnippetsPage() {
         </div>
 
         {/* 検索・フィルター */}
-        <Card className="flex-shrink-0 mb-6">
+        <Card className="flex-shrink-0 mb-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="md:col-span-2">
               <Input
@@ -484,14 +557,14 @@ export default function SnippetsPage() {
           </div>
         </Card>
 
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-0 mb-4">
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-0">
           {/* スニペット一覧 */}
           <div className="lg:col-span-1 flex flex-col min-h-0">
-            <Card className="flex-1 flex flex-col h-full">
+            <Card className="flex-1 flex flex-col min-h-0">
               <div className="p-4 flex-shrink-0">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">文章クリップ一覧</h3>
               </div>
-              <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-3">
+              <div className="flex-1 overflow-y-auto hide-scrollbar px-4 pb-4 space-y-3">
                 {filteredSnippets.map((snippet) => (
                   <div
                     key={snippet.id}
@@ -508,17 +581,9 @@ export default function SnippetsPage() {
                         {snippet.category}
                       </Badge>
                     </div>
-                    <div className="flex flex-wrap gap-1 mb-2">
-                      {snippet.tags.map((tag, index) => (
-                        <Badge key={index} variant="default" size="sm">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                    <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-                      <span>使用回数: {snippet.useCount}</span>
-                      <span>{snippet.lastUsed}</span>
-                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
+                      {snippet.content.split('\n')[0]}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -527,20 +592,19 @@ export default function SnippetsPage() {
 
           {/* スニペット詳細 */}
           <div className="lg:col-span-2 flex flex-col min-h-0">
-            {selectedSnippetData ? (
-              <Card className="flex-1 flex flex-col h-full">
-                <div className="p-6 flex-1 overflow-y-auto">
+            {selectedSnippetMockData ? (
+              <Card className="flex-1 flex flex-col min-h-0">
+                <div className="p-6 flex-1 overflow-y-auto hide-scrollbar">
                   <div className="space-y-6">
                     {/* ヘッダー */}
                     <div className="flex items-start justify-between">
                       <div>
                         <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                          {selectedSnippetData.title}
+                          {selectedSnippetMockData.title}
                         </h3>
                         <div className="flex items-center space-x-4 text-sm text-gray-600 dark:text-gray-400">
-                          <span>カテゴリ: {selectedSnippetData.category}</span>
-                          <span>ショートコード: {selectedSnippetData.shortCode}</span>
-                          <span>使用回数: {selectedSnippetData.useCount}</span>
+                          <span>カテゴリ: {selectedSnippetMockData.category}</span>
+                          <span>バージョン: {selectedSnippetMockData.version}</span>
                         </div>
                       </div>
                       <div className="flex space-x-2">
@@ -553,66 +617,40 @@ export default function SnippetsPage() {
                       </div>
                     </div>
 
-                    {/* タグ */}
-                    <div className="flex flex-wrap gap-1">
-                      {selectedSnippetData.tags.map((tag, index) => (
-                        <Badge key={index} variant="secondary" size="sm">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-
-                  {/* 内容 */}
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-medium text-gray-900 dark:text-white">内容</h4>
-                      <Button
-                        size="sm"
-                        onClick={() => handleCopyToClipboard(selectedSnippetData.content)}
-                      >
-                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
-                        コピー
-                      </Button>
-                    </div>
-                    <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                      <pre className="whitespace-pre-wrap text-sm text-gray-900 dark:text-gray-100 font-mono">
-                        {selectedSnippetData.content}
-                      </pre>
-                    </div>
-                  </div>
-
-                  {/* 変数説明 */}
-                  <div>
-                    <h4 className="font-medium text-gray-900 dark:text-white mb-3">使用可能な変数</h4>
-                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-                      <p className="text-sm text-blue-800 dark:text-blue-200 mb-2">
-                        以下の変数を使用できます：
-                      </p>
-                      <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-                        <li>• {{顧客名}} - 顧客の会社名</li>
-                        <li>• {{担当者名}} - あなたの名前</li>
-                        <li>• {{提案内容}} - 提案内容</li>
-                        <li>• {{サービス内容}} - サービス内容</li>
-                        <li>• {{プロジェクト名}} - プロジェクト名</li>
-                        <li>• {{期間}} - 報告期間</li>
-                      </ul>
-                    </div>
-                  </div>
-
-                  {/* 統計情報 */}
-                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    {/* 内容 */}
                     <div>
-                      <span className="text-gray-600 dark:text-gray-400">作成日:</span>
-                      <span className="ml-2 text-gray-900 dark:text-white">{selectedSnippetData.createdAt}</span>
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-medium text-gray-900 dark:text-white">内容</h4>
+                        <Button variant="outline" size="sm">
+                          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                          コピー
+                        </Button>
+                      </div>
+                      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+                        <pre className="whitespace-pre-wrap text-sm text-gray-900 dark:text-gray-100 font-mono">
+                          {selectedSnippetMockData.content}
+                        </pre>
+                      </div>
                     </div>
-                    <div>
-                      <span className="text-gray-600 dark:text-gray-400">最終使用:</span>
-                      <span className="ml-2 text-gray-900 dark:text-white">{selectedSnippetData.lastUsed}</span>
+
+                    {/* メタ情報 */}
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-600 dark:text-gray-400">最終更新:</span>
+                        <span className="ml-2 text-gray-900 dark:text-white">
+                          {selectedSnippetMockData.lastModified}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-gray-600 dark:text-gray-400">作成者:</span>
+                        <span className="ml-2 text-gray-900 dark:text-white">
+                          {selectedSnippetMockData.createdBy}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
                 </div>
               </Card>
             ) : (
