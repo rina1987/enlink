@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Card } from '../ui/Card';
@@ -66,8 +67,19 @@ export const Sidebar: React.FC = () => {
 
   return (
     <div className="w-64 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-2xl mx-4 my-4 h-[calc(100vh-2rem)] flex flex-col shadow-xl fixed left-0 top-0">
-      <div className="p-6">
+      <div className="p-6 bg-gradient-to-b from-[#a0baf7] to-[#FCFDFF] rounded-t-2xl min-h-[200px]">
         <div className="flex flex-col items-center justify-center space-y-2">
+          {/* ロゴ画像 */}
+          <div className="w-full flex items-center justify-center">
+            <Image
+              src="/seagull.png"
+              alt="EN-LINK ロゴ"
+              width={96}
+              height={78}
+              priority
+              className="h-auto w-auto max-h-16"
+            />
+          </div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-[#2F3D89] to-[#6D7EC5] bg-clip-text text-transparent">
             EN-LINK
           </h1>

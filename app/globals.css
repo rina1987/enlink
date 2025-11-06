@@ -3,7 +3,7 @@
 :root {
   /* Custom color palette based on the provided design */
   --background: #ffffff;
-  --foreground: #222222;
+  --foreground: #333333;
   --secondary-background: #f8f9fa;
   --tertiary-background: #f1f3f4;
   
@@ -166,14 +166,12 @@ body {
 button {
   cursor: pointer;
   border: none;
-  background: none;
   font-family: inherit;
 }
 
 /* Input base styles */
 input, textarea, select {
   font-family: inherit;
-  border: none;
   outline: none;
 }
 
