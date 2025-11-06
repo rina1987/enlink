@@ -68,7 +68,6 @@ export interface Database {
           attendees: string[] | null
           content: string
           links: string[] | null
-          attachments: Json | null
           created_at: string
           updated_at: string
         }

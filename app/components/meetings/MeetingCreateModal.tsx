@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card } from '@/app/components/ui/Card';
 import { Button } from '@/app/components/ui/Button';
 import { Input } from '@/app/components/ui/Input';
@@ -16,15 +16,38 @@ interface MeetingCreateModalProps {
 
 export function MeetingCreateModal({ customer, isOpen, onClose, onSuccess }: MeetingCreateModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const getLocalDateString = (d: Date) => {
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  };
+  const getLocalTimeString = (d: Date) => {
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+
+  const now = new Date();
   const [meeting, setMeeting] = useState({
     title: '',
-    date: new Date().toISOString().split('T')[0],
-    time: '10:00',
+    date: getLocalDateString(now),
+    time: getLocalTimeString(now),
     location: '',
     attendees: [] as string[],
     content: '',
     linksText: ''
   });
+
+  // モーダルを開く毎に現在日時で初期化
+  useEffect(() => {
+    if (isOpen) {
+      const d = new Date();
+      setMeeting(prev => ({
+        ...prev,
+        date: getLocalDateString(d),
+        time: getLocalTimeString(d)
+      }));
+    }
+  }, [isOpen]);
   
 
   if (!isOpen) return null;
@@ -44,24 +67,25 @@ export function MeetingCreateModal({ customer, isOpen, onClose, onSuccess }: Mee
 
       await MeetingService.create({
         customer_id: customer.id,
+        project_id: null,
         title: meeting.title,
         date: dateIso,
         location: meeting.location || null,
-        attendees: meeting.attendees,
+        attendees: meeting.attendees && meeting.attendees.length > 0 ? meeting.attendees : null,
         content: meeting.content,
         links: meeting.linksText
           ? meeting.linksText
               .split(/\n|,/) // 改行またはカンマ区切り
               .map(v => v.trim())
               .filter(Boolean)
-          : null,
-        attachments: null
+          : null
       });
       onSuccess();
       onClose();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to create meeting:', error);
-      alert('面談記録の登録に失敗しました。');
+      const msg = error?.message || error?.error_description || String(error);
+      alert(`面談記録の登録に失敗しました。\n${msg}`);
     } finally {
       setIsSubmitting(false);
     }

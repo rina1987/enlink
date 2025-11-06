@@ -8,6 +8,7 @@ import { Input } from '../components/ui/Input';
 import { Badge } from '../components/ui/Badge';
 import { SnippetService, Snippet } from '@/lib/services/snippet.service';
 import { SnippetCreateModal } from '../components/snippets/SnippetCreateModal';
+import { SnippetEditModal } from '../components/snippets/SnippetEditModal';
 
 export default function SnippetsPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -15,6 +16,9 @@ export default function SnippetsPage() {
   const [selectedSnippetId, setSelectedSnippetId] = useState<string | null>(null);
   const [snippets, setSnippets] = useState<Snippet[]>([]);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const loadSnippets = async () => {
     try {
@@ -145,8 +149,8 @@ export default function SnippetsPage() {
                         </div>
                       </div>
                       <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">編集</Button>
-                        <Button variant="outline" size="sm">削除</Button>
+                        <Button variant="outline" size="sm" onClick={() => setIsEditOpen(true)}>編集</Button>
+                        <Button variant="outline" size="sm" onClick={() => setDeletingId(selectedSnippetData.id)}>削除</Button>
                       </div>
                     </div>
 
@@ -189,6 +193,55 @@ export default function SnippetsPage() {
       </div>
       {/* 作成モーダル */}
       <SnippetCreateModal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} onSuccess={loadSnippets} />
+      {/* 編集モーダル */}
+      {selectedSnippetData && (
+        <SnippetEditModal
+          snippet={selectedSnippetData}
+          isOpen={isEditOpen}
+          onClose={() => setIsEditOpen(false)}
+          onSaved={async () => {
+            await loadSnippets();
+          }}
+        />
+      )}
+      {/* 削除確認モーダル */}
+      {deletingId && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <Card className="w-full max-w-md m-4">
+            <div className="p-6 space-y-4">
+              <h3 className="text-lg font-semibold text-text">本当に削除してよろしいですか？</h3>
+              <p className="text-sm text-text-light">この操作は取り消せません。</p>
+              <div className="flex justify-end gap-2 pt-2">
+                <Button variant="outline" onClick={() => setDeletingId(null)}>キャンセル</Button>
+                <Button
+                  className="text-white"
+                  disabled={isDeleting}
+                  onClick={async () => {
+                    try {
+                      setIsDeleting(true);
+                      await SnippetService.delete(deletingId);
+                      setDeletingId(null);
+                      await loadSnippets();
+                      // 選択中が削除されたら先頭に切り替え
+                      if (selectedSnippetId === deletingId) {
+                        const latest = (await SnippetService.getAll())[0];
+                        setSelectedSnippetId(latest ? latest.id : null);
+                      }
+                    } catch (e) {
+                      console.error('Failed to delete snippet', e);
+                      alert('削除に失敗しました');
+                    } finally {
+                      setIsDeleting(false);
+                    }
+                  }}
+                >
+                  削除する
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
     </DashboardLayout>
   );
 }

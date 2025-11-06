@@ -15,6 +15,8 @@ export default function MeetingsPage() {
   const [projectFilter, setProjectFilter] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMeeting, setSelectedMeeting] = useState<any | null>(null);
+  const [deletingMeetingId, setDeletingMeetingId] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const searchParams = useSearchParams();
 
   const fetchMeetings = async () => {
@@ -167,7 +169,22 @@ export default function MeetingsPage() {
                         <div className="text-xs text-text-light mt-1 truncate">参加者: {meeting.attendees.join(', ')}</div>
                       )}
                     </div>
-                    <div className="text-xs text-text-light whitespace-nowrap">{formatDate(meeting.date)}</div>
+                    <div className="flex items-center gap-2">
+                      <div className="text-xs text-text-light whitespace-nowrap">{formatDate(meeting.date)}</div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeletingMeetingId(meeting.id);
+                        }}
+                        className="text-error hover:text-error/80"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </Button>
+                    </div>
                   </div>
                 </Card>
               ))}
@@ -199,7 +216,22 @@ export default function MeetingsPage() {
                           <div className="text-base font-semibold text-text truncate">{meeting.customer?.company_name || '不明な顧客'}</div>
                           <div className="text-sm text-text-light truncate">{meeting.title}</div>
                         </div>
-                        <div className="text-xs text-text-light whitespace-nowrap">{formatDate(meeting.date)}</div>
+                        <div className="flex items-center gap-2">
+                          <div className="text-xs text-text-light whitespace-nowrap">{formatDate(meeting.date)}</div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeletingMeetingId(meeting.id);
+                            }}
+                            className="text-error hover:text-error/80"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </Button>
+                        </div>
                       </div>
                     </Card>
                   ))}
@@ -240,6 +272,40 @@ export default function MeetingsPage() {
               setSelectedMeeting(null);
             }}
           />
+        )}
+
+        {/* 削除確認モーダル */}
+        {deletingMeetingId && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+            <Card className="w-full max-w-md m-4">
+              <div className="p-6 space-y-4">
+                <h3 className="text-lg font-semibold text-text">本当に削除してよろしいですか？</h3>
+                <p className="text-sm text-text-light">この操作は取り消せません。</p>
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button variant="outline" onClick={() => setDeletingMeetingId(null)}>キャンセル</Button>
+                  <Button
+                    className="text-white"
+                    disabled={isDeleting}
+                    onClick={async () => {
+                      try {
+                        setIsDeleting(true);
+                        await MeetingService.delete(deletingMeetingId);
+                        setDeletingMeetingId(null);
+                        await fetchMeetings();
+                      } catch (e) {
+                        console.error('Failed to delete meeting', e);
+                        alert('削除に失敗しました');
+                      } finally {
+                        setIsDeleting(false);
+                      }
+                    }}
+                  >
+                    削除する
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          </div>
         )}
       </div>
     </DashboardLayout>
