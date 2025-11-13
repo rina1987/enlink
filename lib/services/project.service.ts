@@ -16,6 +16,7 @@ export class ProjectService {
           company_name
         )
       `)
+      .order('display_order', { ascending: true, nullsFirst: false })
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -33,6 +34,7 @@ export class ProjectService {
         )
       `)
       .eq('customer_id', customerId)
+      .order('display_order', { ascending: true, nullsFirst: false })
       .order('created_at', { ascending: false });
 
     if (error) throw error;

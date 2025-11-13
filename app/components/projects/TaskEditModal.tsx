@@ -21,6 +21,7 @@ export function TaskEditModal({ taskId, initialName, initialColor, isOpen, onClo
   const [name, setName] = useState(initialName);
   const [color, setColor] = useState(initialColor || COLOR_PALETTE[0]);
   const [saving, setSaving] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   if (!isOpen) return null;
 
@@ -33,6 +34,20 @@ export function TaskEditModal({ taskId, initialName, initialColor, isOpen, onClo
     } catch (e) {
       console.error('Failed to update task', e);
       alert('更新に失敗しました');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      setSaving(true);
+      await ProjectTaskService.delete(taskId);
+      onSaved();
+      onClose();
+    } catch (e) {
+      console.error('Failed to delete task', e);
+      alert('削除に失敗しました');
     } finally {
       setSaving(false);
     }
@@ -62,12 +77,29 @@ export function TaskEditModal({ taskId, initialName, initialColor, isOpen, onClo
               ))}
             </div>
           </div>
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={onClose}>キャンセル</Button>
-            <Button onClick={handleSave} disabled={!name || saving}>{saving ? '保存中…' : '保存'}</Button>
+          <div className="flex items-center justify-between gap-2">
+            <Button variant="ghost" className="text-error hover:text-error/80" onClick={() => setConfirmDelete(true)}>削除</Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={onClose}>キャンセル</Button>
+              <Button onClick={handleSave} disabled={!name || saving}>{saving ? '保存中…' : '保存'}</Button>
+            </div>
           </div>
         </div>
       </Card>
+      {confirmDelete && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <Card className="w-full max-w-md m-4">
+            <div className="p-6 space-y-4">
+              <h3 className="text-lg font-semibold text-text">本当に削除してよろしいですか？</h3>
+              <p className="text-sm text-text-light">この操作は取り消せません。</p>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setConfirmDelete(false)}>キャンセル</Button>
+                <Button className="text-white" onClick={handleDelete} disabled={saving}>削除する</Button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

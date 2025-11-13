@@ -22,6 +22,31 @@ export default function ProjectsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const searchParams = useSearchParams();
 
+  const persistDisplayOrder = async (next: any[]) => {
+    try {
+      await Promise.all(
+        next.map((p, index) => ProjectService.update(p.id, { display_order: index as any }))
+      );
+    } catch (e) {
+      console.error('Failed to persist display order', e);
+    }
+  };
+
+  const moveProject = (projectId: string, direction: 'up' | 'down') => {
+    setProjects((prev) => {
+      const index = prev.findIndex((p) => p.id === projectId);
+      if (index === -1) return prev;
+      const targetIndex = direction === 'up' ? index - 1 : index + 1;
+      if (targetIndex < 0 || targetIndex >= prev.length) return prev;
+      const next = [...prev] as any[];
+      const [item] = next.splice(index, 1);
+      next.splice(targetIndex, 0, item);
+      // 非同期で順序を永続化（UIブロックしない）
+      void persistDisplayOrder(next);
+      return next;
+    });
+  };
+
   useEffect(() => {
     const loadProjects = async () => {
       try {
@@ -39,13 +64,7 @@ export default function ProjectsPage() {
           }))
         );
 
-        // highlight指定があれば、対象案件を先頭に並べ替え
-        const highlightId = searchParams.get('highlight');
-        const sorted = highlightId
-          ? [...data].sort((a, b) => (a.id === highlightId ? -1 : b.id === highlightId ? 1 : 0))
-          : data;
-
-        const formattedProjects = sorted.map(project => {
+        const formattedProjects = data.map(project => {
           const item = tasksByProject.find(t => t.projectId === project.id);
           const tasks = (item?.tasks || []).map(t => ({
             id: t.id,
@@ -141,6 +160,13 @@ export default function ProjectsPage() {
     projectId: string
     taskId: string
     originX: number
+    startIndex: number
+    endIndex: number
+  }>(null);
+  // ドラッグ中のプレビュー（移動軌跡の表示用）
+  const [dragPreview, setDragPreview] = useState<null | {
+    projectId: string
+    taskId: string
     startIndex: number
     endIndex: number
   }>(null);
@@ -259,6 +285,7 @@ export default function ProjectsPage() {
       setProjects(formatted);
     } finally {
       setDragState(null);
+      setDragPreview(null);
     }
   };
 
@@ -312,6 +339,34 @@ export default function ProjectsPage() {
           newEnd += deltaDays;
         }
         finishDragAndSave(newStart, newEnd);
+      }} onMouseMove={(e) => {
+        if (!dragState) return;
+        const areaEl = barAreaRefs.current[dragState.projectId];
+        if (!areaEl) return;
+        const rect = areaEl.getBoundingClientRect();
+        const maxDays = viewMode === 'month' ? 31 : 7;
+        const dayWidth = rect.width / maxDays;
+        const dx = (e.clientX - dragState.originX);
+        const deltaDays = Math.round(dx / dayWidth);
+        let newStart = dragState.startIndex;
+        let newEnd = dragState.endIndex;
+        if (dragState.mode === 'move') {
+          newStart += deltaDays;
+          newEnd += deltaDays;
+        } else if (dragState.mode === 'resize-start') {
+          newStart += deltaDays;
+        } else if (dragState.mode === 'resize-end') {
+          newEnd += deltaDays;
+        }
+        const clamp = (n: number) => Math.max(0, Math.min(maxDays - 1, n));
+        const s = clamp(Math.min(newStart, newEnd));
+        const eIdx = clamp(Math.max(newStart, newEnd));
+        setDragPreview({
+          projectId: dragState.projectId,
+          taskId: dragState.taskId,
+          startIndex: s,
+          endIndex: eIdx
+        });
       }}>
         {/* ヘッダー */}
         <div className="flex items-center justify-between mb-6">
@@ -447,24 +502,38 @@ export default function ProjectsPage() {
                         <div className="w-80 flex-shrink-0 pr-4">
                           <div className="flex items-center justify-between">
                             <div className="flex-1">
-                              <div className="text-lg font-bold text-gray-900 dark:text-white">
-                                {project.name}
-                              </div>
-                              <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                              <div className="text-xl font-bold text-gray-900 dark:text-white">
                                 {project.client}
                               </div>
+                              <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                {project.name}
+                              </div>
                             </div>
-                            <div className="flex items-center gap-1">
-                              <Button variant="ghost" size="sm" onClick={() => setOpenTaskProjectId(project.id)}>
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                </svg>
-                              </Button>
-                              <Button variant="ghost" size="sm" className="text-error hover:text-error/80" onClick={() => setDeletingProjectId(project.id)}>
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                              </Button>
+                            <div className="flex flex-col items-end gap-1">
+                              <div className="flex items-center gap-1">
+                                <Button variant="ghost" size="sm" onClick={() => setOpenTaskProjectId(project.id)} title="工程を追加">
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                  </svg>
+                                </Button>
+                                <Button variant="ghost" size="sm" className="text-error hover:text-error/80" onClick={() => setDeletingProjectId(project.id)} title="案件を削除">
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
+                                </Button>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Button variant="ghost" size="sm" onClick={() => moveProject(project.id, 'up')} title="上へ移動">
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                                  </svg>
+                                </Button>
+                                <Button variant="ghost" size="sm" onClick={() => moveProject(project.id, 'down')} title="下へ移動">
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                  </svg>
+                                </Button>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -547,6 +616,27 @@ export default function ProjectsPage() {
                                     </div>
                                   );
                                 })}
+
+                                {/* ドラッグプレビュー（軌跡） */}
+                                {dragPreview && dragPreview.projectId === project.id && (() => {
+                                  const t = placed.find((pt: any) => pt.id === dragPreview.taskId);
+                                  const previewRow = t ? t.row : 0;
+                                  const startPercent = (dragPreview.startIndex / maxDays) * 100;
+                                  const width = ((dragPreview.endIndex - dragPreview.startIndex + 1) / maxDays) * 100;
+                                  return (
+                                    <div
+                                      className="absolute pointer-events-none z-20"
+                                      style={{
+                                        left: `${startPercent}%`,
+                                        width: `${width}%`,
+                                        top: previewRow * rowHeight + 8,
+                                        height: '24px'
+                                      }}
+                                    >
+                                      <div className="h-full w-full rounded-md border-2 border-blue-400/80 bg-blue-400/20" />
+                                    </div>
+                                  );
+                                })()}
 
                                 {/* 高さを重なり数に合わせて最低確保 */}
                                 <div style={{ height: rowsCount * rowHeight + 16 }} />

@@ -35,6 +35,7 @@ export interface Database {
           start_date: string
           end_date: string
           status: 'not_started' | 'in_progress' | 'completed' | 'on_hold'
+          display_order: number | null
           created_at: string
           updated_at: string
         }
