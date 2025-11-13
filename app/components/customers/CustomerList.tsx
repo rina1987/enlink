@@ -98,7 +98,7 @@ export function CustomerList({ customers, onUpdate }: CustomerListProps) {
   return (
     <>
       <Card className="flex-1 flex flex-col min-h-0 overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto overflow-y-auto max-h-[70vh]">
           <table className="w-full">
             <thead className="bg-white/80 backdrop-blur-xl sticky top-0 z-10">
               <tr className="border-b">

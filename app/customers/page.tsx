@@ -8,13 +8,13 @@ import { CustomerCreateModal } from '@/app/components/customers/CustomerCreateMo
 import { CustomerSearchFilter, SearchFilters } from '@/app/components/customers/CustomerSearchFilter';
 import { Button } from '@/app/components/ui/Button';
 import { Card } from '@/app/components/ui/Card';
-import { CustomerService } from '@/lib/services/customer.service';
+import { CustomerService, Customer } from '@/lib/services/customer.service';
 import { DashboardLayout } from '@/app/components/layout/DashboardLayout';
 import { useRouter } from 'next/navigation';
 
 export default function CustomersPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [customers, setCustomers] = useState<Awaited<ReturnType<typeof CustomerService.getAll>>>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchFilters, setSearchFilters] = useState<SearchFilters>({
     searchTerm: '',

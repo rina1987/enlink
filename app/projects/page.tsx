@@ -206,6 +206,7 @@ export default function ProjectsPage() {
     startIndex: number,
     endIndex: number
   ) => {
+    e.preventDefault();
     e.stopPropagation();
     setDragState({
       mode: edge === 'start' ? 'resize-start' : 'resize-end',
@@ -225,6 +226,7 @@ export default function ProjectsPage() {
     startIndex: number,
     endIndex: number
   ) => {
+    e.preventDefault();
     setDragState({
       mode: 'move',
       projectId,
@@ -234,6 +236,66 @@ export default function ProjectsPage() {
       endIndex
     });
   };
+
+  // グローバルなドラッグ監視（移動軌跡プレビューとドロップ確定）
+  useEffect(() => {
+    if (!dragState) return;
+    const onMove = (e: MouseEvent) => {
+      const areaEl = barAreaRefs.current[dragState.projectId];
+      if (!areaEl) return;
+      const rect = areaEl.getBoundingClientRect();
+      const maxDays = viewMode === 'month' ? 31 : 7;
+      const dayWidth = rect.width / maxDays;
+      const dx = (e.clientX - dragState.originX);
+      let newStart = dragState.startIndex;
+      let newEnd = dragState.endIndex;
+      if (dragState.mode === 'move') {
+        newStart += Math.round(dx / dayWidth);
+        newEnd += Math.round(dx / dayWidth);
+      } else if (dragState.mode === 'resize-start') {
+        newStart += Math.round(dx / dayWidth);
+      } else if (dragState.mode === 'resize-end') {
+        newEnd += Math.round(dx / dayWidth);
+      }
+      const clamp = (n: number) => Math.max(0, Math.min(maxDays - 1, n));
+      const s = clamp(Math.min(newStart, newEnd));
+      const eIdx = clamp(Math.max(newStart, newEnd));
+      setDragPreview({
+        projectId: dragState.projectId,
+        taskId: dragState.taskId,
+        startIndex: s,
+        endIndex: eIdx
+      });
+    };
+    const onUp = (e: MouseEvent) => {
+      const areaEl = barAreaRefs.current[dragState.projectId];
+      if (!areaEl) {
+        finishDragAndSave(dragState.startIndex, dragState.endIndex);
+        return;
+      }
+      const rect = areaEl.getBoundingClientRect();
+      const maxDays = viewMode === 'month' ? 31 : 7;
+      const dayWidth = rect.width / maxDays;
+      const dx = (e.clientX - dragState.originX);
+      let newStart = dragState.startIndex;
+      let newEnd = dragState.endIndex;
+      if (dragState.mode === 'move') {
+        newStart += Math.round(dx / dayWidth);
+        newEnd += Math.round(dx / dayWidth);
+      } else if (dragState.mode === 'resize-start') {
+        newStart += Math.round(dx / dayWidth);
+      } else if (dragState.mode === 'resize-end') {
+        newEnd += Math.round(dx / dayWidth);
+      }
+      finishDragAndSave(newStart, newEnd);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+  }, [dragState, viewMode, currentDate]);
 
   // ドラッグ終了時にDB更新
   const finishDragAndSave = async (newStartIdx: number, newEndIdx: number) => {
@@ -315,59 +377,7 @@ export default function ProjectsPage() {
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col" onMouseUp={(e) => {
-        if (!dragState) return;
-        // グリッド幅から日数デルタを算出
-        const areaEl = barAreaRefs.current[dragState.projectId];
-        if (!areaEl) {
-          finishDragAndSave(dragState.startIndex, dragState.endIndex);
-          return;
-        }
-        const rect = areaEl.getBoundingClientRect();
-        const maxDays = viewMode === 'month' ? 31 : 7;
-        const dayWidth = rect.width / maxDays;
-        const dx = (e.clientX - dragState.originX);
-        const deltaDays = Math.round(dx / dayWidth);
-        let newStart = dragState.startIndex;
-        let newEnd = dragState.endIndex;
-        if (dragState.mode === 'move') {
-          newStart += deltaDays;
-          newEnd += deltaDays;
-        } else if (dragState.mode === 'resize-start') {
-          newStart += deltaDays;
-        } else if (dragState.mode === 'resize-end') {
-          newEnd += deltaDays;
-        }
-        finishDragAndSave(newStart, newEnd);
-      }} onMouseMove={(e) => {
-        if (!dragState) return;
-        const areaEl = barAreaRefs.current[dragState.projectId];
-        if (!areaEl) return;
-        const rect = areaEl.getBoundingClientRect();
-        const maxDays = viewMode === 'month' ? 31 : 7;
-        const dayWidth = rect.width / maxDays;
-        const dx = (e.clientX - dragState.originX);
-        const deltaDays = Math.round(dx / dayWidth);
-        let newStart = dragState.startIndex;
-        let newEnd = dragState.endIndex;
-        if (dragState.mode === 'move') {
-          newStart += deltaDays;
-          newEnd += deltaDays;
-        } else if (dragState.mode === 'resize-start') {
-          newStart += deltaDays;
-        } else if (dragState.mode === 'resize-end') {
-          newEnd += deltaDays;
-        }
-        const clamp = (n: number) => Math.max(0, Math.min(maxDays - 1, n));
-        const s = clamp(Math.min(newStart, newEnd));
-        const eIdx = clamp(Math.max(newStart, newEnd));
-        setDragPreview({
-          projectId: dragState.projectId,
-          taskId: dragState.taskId,
-          startIndex: s,
-          endIndex: eIdx
-        });
-      }}>
+      <div className="flex flex-col">
         {/* ヘッダー */}
         <div className="flex items-center justify-between mb-6">
           <div>
@@ -467,7 +477,7 @@ export default function ProjectsPage() {
                         return (
                           <div 
                             key={`date-${index}`}
-                            className={`text-center py-1 relative ${isToday ? 'bg-blue-50 dark:bg-blue-900/20 rounded-lg' : ''}`}
+                            className={`text-center py-1 relative ${isToday ? 'bg-blue-50 dark:bg-blue-900/20 rounded-lg' : ''} ${index === 0 ? 'border-l-transparent' : 'border-l border-gray-200 dark:border-gray-800/70'}`}
                           >
                             <div className={`text-xs font-medium ${
                               isWeekend ? 'text-red-500' : 
@@ -543,6 +553,30 @@ export default function ProjectsPage() {
                           {(() => {
                             // 1) タスクを期間のインデックスに変換
                             const maxDays = viewMode === 'month' ? 31 : 7;
+                            // 背景グリッド（縦線）
+                            const gridOverlay = (
+                              <div className="absolute inset-0 pointer-events-none">
+                                <div
+                                  className="absolute inset-0"
+                                  style={{
+                                    backgroundImage: 'linear-gradient(to right, rgba(0,0,0,0.06) 1px, transparent 1px)',
+                                    backgroundSize: `${100 / maxDays}% 100%`,
+                                    backgroundRepeat: 'repeat-x'
+                                  }}
+                                />
+                                {(() => {
+                                  const todayIdx = days.findIndex(d => d.toDateString() === new Date().toDateString());
+                                  if (todayIdx < 0) return null;
+                                  const left = (todayIdx / maxDays) * 100;
+                                  return (
+                                    <div
+                                      className="absolute top-0 bottom-0 w-0.5 bg-blue-400/40"
+                                      style={{ left: `${left}%` }}
+                                    />
+                                  );
+                                })()}
+                              </div>
+                            );
                             const indexedTasks = project.tasks
                               .map((task: any) => {
                                 const taskDays: number[] = [];
@@ -576,6 +610,7 @@ export default function ProjectsPage() {
 
                             return (
                               <>
+                                {gridOverlay}
                                 {placed.map((task: any, i: number) => {
                                   const startPercent = (task.startIndex / maxDays) * 100;
                                   const width = ((task.endIndex - task.startIndex + 1) / maxDays) * 100;

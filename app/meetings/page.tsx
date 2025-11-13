@@ -162,12 +162,9 @@ export default function MeetingsPage() {
                       {/* 会社名を強調 */}
                       <div className="text-base font-semibold text-text truncate">{meeting.customer?.company_name || '不明な顧客'}</div>
                       <div className="text-sm text-text-light truncate">{meeting.title}</div>
-                      {meeting.location && (
-                        <div className="text-xs text-text-light mt-1 truncate">場所: {meeting.location}</div>
-                      )}
-                      {meeting.attendees && meeting.attendees.length > 0 && (
-                        <div className="text-xs text-text-light mt-1 truncate">参加者: {meeting.attendees.join(', ')}</div>
-                      )}
+                      <div className="text-sm text-text mt-2 whitespace-pre-line line-clamp-2">
+                        {(meeting.content || '').split('\\n').slice(0, 2).join('\\n')}
+                      </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="text-xs text-text-light whitespace-nowrap">{formatDate(meeting.date)}</div>
@@ -215,6 +212,9 @@ export default function MeetingsPage() {
                         <div className="min-w-0">
                           <div className="text-base font-semibold text-text truncate">{meeting.customer?.company_name || '不明な顧客'}</div>
                           <div className="text-sm text-text-light truncate">{meeting.title}</div>
+                          <div className="text-sm text-text mt-2 whitespace-pre-line line-clamp-2">
+                            {(meeting.content || '').split('\\n').slice(0, 2).join('\\n')}
+                          </div>
                         </div>
                         <div className="flex items-center gap-2">
                           <div className="text-xs text-text-light whitespace-nowrap">{formatDate(meeting.date)}</div>

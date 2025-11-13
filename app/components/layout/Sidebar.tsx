@@ -1,11 +1,12 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Card } from '../ui/Card';
 import { Calendar } from '../ui/Calendar';
+import { supabase } from '@/lib/supabase';
 
 interface NavigationItem {
   name: string;
@@ -64,6 +65,27 @@ const navigation: NavigationItem[] = [
 
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();
+  const router = useRouter();
+  const [email, setEmail] = useState<string | null>(null);
+  const [name, setName] = useState<string | null>(null);
+
+  useEffect(() => {
+    const load = async () => {
+      const { data } = await supabase.auth.getUser();
+      setEmail(data.user?.email ?? null);
+      const fullName = (data.user?.user_metadata as any)?.full_name || (data.user?.user_metadata as any)?.name || null;
+      setName(fullName);
+    };
+    load();
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setEmail(session?.user?.email ?? null);
+      const fullName = (session?.user?.user_metadata as any)?.full_name || (session?.user?.user_metadata as any)?.name || null;
+      setName(fullName);
+    });
+    return () => {
+      sub.subscription.unsubscribe();
+    };
+  }, []);
 
   return (
     <div className="w-64 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-2xl mx-4 my-4 h-[calc(100vh-2rem)] flex flex-col shadow-xl fixed left-0 top-0">
@@ -123,18 +145,32 @@ export const Sidebar: React.FC = () => {
 
       {/* ユーザー情報 */}
       <div className="mt-auto p-4 border-t border-gray-200/50 dark:border-gray-700/50">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-red-500 rounded-full flex items-center justify-center shadow-sm">
-            <span className="text-white text-sm font-semibold">乘</span>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 bg-gradient-to-br from-indigo-400 to-blue-500 rounded-full flex items-center justify-center shadow-sm">
+              <span className="text-white text-sm font-semibold">
+                {(name || email || 'U').slice(0, 1).toUpperCase()}
+              </span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                {name || 'ユーザー'}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                {email || 'not signed in'}
+              </p>
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-              乘松 利奈
-            </p>
-            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-              norimatsu@example.com
-            </p>
-          </div>
+          <button
+            onClick={async () => {
+              await supabase.auth.signOut();
+              router.replace('/login');
+            }}
+            className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 transition"
+            title="ログアウト"
+          >
+            ログアウト
+          </button>
         </div>
       </div>
     </div>
