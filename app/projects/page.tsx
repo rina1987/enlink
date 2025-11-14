@@ -52,8 +52,8 @@ export default function ProjectsPage() {
       try {
         setIsLoading(true);
         const customerId = searchParams.get('customer');
-        // 常に全件を取得
-        const data = await ProjectService.getAll();
+        // 常に全件を取得（型安全のため any にキャスト）
+        const data: any[] = await ProjectService.getAll();
 
         // プロジェクトデータを整形
         // 各プロジェクトのタスクを取得
@@ -66,7 +66,8 @@ export default function ProjectsPage() {
 
         const formattedProjects = data.map(project => {
           const item = tasksByProject.find(t => t.projectId === project.id);
-          const tasks = (item?.tasks || []).map(t => ({
+          const taskSrc: any[] = (item?.tasks as any[]) || [];
+          const tasks = taskSrc.map((t: any) => ({
             id: t.id,
             name: t.name,
             startDate: new Date(t.start_date),
@@ -329,13 +330,14 @@ export default function ProjectsPage() {
       });
       // 再読み込み
       const customerId = searchParams.get('customer');
-      const data = customerId ? await ProjectService.getByCustomerId(customerId) : await ProjectService.getAll();
+      const data: any[] = customerId ? await ProjectService.getByCustomerId(customerId) : await ProjectService.getAll();
       const tasksByProject = await Promise.all(
         data.map(async (p) => ({ projectId: p.id, tasks: await ProjectTaskService.getByProjectId(p.id) }))
       );
       const formatted = data.map(project => {
         const item = tasksByProject.find(t => t.projectId === project.id);
-        const tasks = (item?.tasks || []).map(t => ({
+        const taskSrc: any[] = (item?.tasks as any[]) || [];
+        const tasks = taskSrc.map((t: any) => ({
           id: t.id,
           name: t.name,
           startDate: new Date(t.start_date),
@@ -725,7 +727,7 @@ export default function ProjectsPage() {
                         await ProjectService.delete(deletingProjectId);
                         // 再読み込み
                         const customerId = searchParams.get('customer');
-                        const data = customerId
+                        const data: any[] = customerId
                           ? await ProjectService.getByCustomerId(customerId)
                           : await ProjectService.getAll();
                         const tasksByProject = await Promise.all(
@@ -733,7 +735,8 @@ export default function ProjectsPage() {
                         );
                         const formatted = data.map(project => {
                           const item = tasksByProject.find(t => t.projectId === project.id);
-                          const tasks = (item?.tasks || []).map(t => ({
+                          const taskSrc: any[] = (item?.tasks as any[]) || [];
+                          const tasks = taskSrc.map((t: any) => ({
                             name: t.name,
                             startDate: new Date(t.start_date),
                             endDate: new Date(t.end_date),
@@ -767,7 +770,7 @@ export default function ProjectsPage() {
               // 追加後に再読み込み
               const reload = async () => {
                 const customerId = searchParams.get('customer');
-                const data = customerId
+                const data: any[] = customerId
                   ? await ProjectService.getByCustomerId(customerId)
                   : await ProjectService.getAll();
                 const tasksByProject = await Promise.all(
@@ -775,7 +778,8 @@ export default function ProjectsPage() {
                 );
                 const formatted = data.map(project => {
                   const item = tasksByProject.find(t => t.projectId === project.id);
-                  const tasks = (item?.tasks || []).map(t => ({
+                  const taskSrc: any[] = (item?.tasks as any[]) || [];
+                  const tasks = taskSrc.map((t: any) => ({
                     name: t.name,
                     startDate: new Date(t.start_date),
                     endDate: new Date(t.end_date),
@@ -800,13 +804,14 @@ export default function ProjectsPage() {
             onClose={() => setEditingTask(null)}
             onSaved={async () => {
               const customerId = searchParams.get('customer');
-              const data = customerId ? await ProjectService.getByCustomerId(customerId) : await ProjectService.getAll();
+              const data: any[] = customerId ? await ProjectService.getByCustomerId(customerId) : await ProjectService.getAll();
               const tasksByProject = await Promise.all(
                 data.map(async (p) => ({ projectId: p.id, tasks: await ProjectTaskService.getByProjectId(p.id) }))
               );
               const formatted = data.map(project => {
                 const item = tasksByProject.find(t => t.projectId === project.id);
-                const tasks = (item?.tasks || []).map(t => ({
+                const taskSrc: any[] = (item?.tasks as any[]) || [];
+                const tasks = taskSrc.map((t: any) => ({
                   id: t.id,
                   name: t.name,
                   startDate: new Date(t.start_date),
