@@ -50,7 +50,8 @@ export function CustomerList({ customers, onUpdate }: CustomerListProps) {
           .select('customer_id')
           .in('customer_id', ids);
         if (error) throw error;
-        const set = new Set<string>(data?.map(d => d.customer_id) || []);
+        const rows = (data ?? []) as Array<{ customer_id: string }>;
+        const set = new Set<string>(rows.map(d => d.customer_id));
         setCustomerIdsWithProject(set);
       } catch (e) {
         console.error('Failed to check existing projects', e);
@@ -76,12 +77,14 @@ export function CustomerList({ customers, onUpdate }: CustomerListProps) {
         description: null,
         start_date: ymd,
         end_date: ymd,
-        status: 'not_started'
+        status: 'not_started',
+        display_order: null
       });
 
       onUpdate();
       setCustomerIdsWithProject(prev => new Set(prev).add(customer.id));
-      router.push(`/projects?highlight=${created.id}`);
+      // highlightは使用せず、一覧全件を表示
+      router.push(`/projects`);
     } catch (error) {
       console.error('Failed to create project:', error);
       alert('案件の作成に失敗しました');

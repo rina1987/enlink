@@ -38,7 +38,8 @@ export function ProjectCreateModal({ customer, isOpen, onClose, onSuccess }: Pro
       setIsSubmitting(true);
       await ProjectService.create({
         ...project,
-        customer_id: customer.id
+        customer_id: customer.id,
+        display_order: null
       });
       onSuccess();
       onClose();
