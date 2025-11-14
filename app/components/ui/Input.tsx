@@ -15,6 +15,7 @@ export const Input: React.FC<InputProps> = ({
   ...props
 }) => {
   const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`;
+  const { value, ...rest } = props as React.InputHTMLAttributes<HTMLInputElement>;
   
   return (
     <div className="space-y-1">
@@ -36,7 +37,8 @@ export const Input: React.FC<InputProps> = ({
           ${error ? 'border-red-500 focus:border-red-500 focus:ring-red-100 dark:focus:ring-red-900' : ''}
           ${className}
         `}
-        {...props}
+        value={(value as any) ?? ''}
+        {...rest}
       />
       {error && (
         <p className="text-sm text-red-600 dark:text-red-400">{error}</p>

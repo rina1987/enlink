@@ -91,7 +91,7 @@ export function CustomerCreateModal({ isOpen, onClose, onSuccess }: CustomerCrea
               <div>
                 <label className="text-sm font-medium text-text">業種</label>
                 <Input
-                  value={customer.industry}
+                  value={customer.industry ?? ''}
                   onChange={(e) => handleChange('industry', e.target.value)}
                   className="mt-1 block w-full rounded-lg border border-gray-200 px-3 py-2 focus:border-primary focus:ring-primary dark:border-gray-700 dark:bg-gray-800"
                 />
@@ -100,7 +100,7 @@ export function CustomerCreateModal({ isOpen, onClose, onSuccess }: CustomerCrea
               <div>
                 <label className="text-sm font-medium text-text">電話番号</label>
                 <Input
-                  value={customer.phone}
+                  value={customer.phone ?? ''}
                   onChange={(e) => handleChange('phone', e.target.value)}
                   className="mt-1 block w-full rounded-lg border border-gray-200 px-3 py-2 focus:border-primary focus:ring-primary dark:border-gray-700 dark:bg-gray-800"
                   type="tel"
@@ -112,7 +112,7 @@ export function CustomerCreateModal({ isOpen, onClose, onSuccess }: CustomerCrea
               <div>
                 <label className="text-sm font-medium text-text">メールアドレス</label>
                 <Input
-                  value={customer.email}
+                  value={customer.email ?? ''}
                   onChange={(e) => handleChange('email', e.target.value)}
                   className="mt-1 block w-full rounded-lg border border-gray-200 px-3 py-2 focus:border-primary focus:ring-primary dark:border-gray-700 dark:bg-gray-800"
                   type="email"
@@ -122,7 +122,7 @@ export function CustomerCreateModal({ isOpen, onClose, onSuccess }: CustomerCrea
               <div>
                 <label className="text-sm font-medium text-text">住所</label>
                 <Input
-                  value={customer.address}
+                  value={customer.address ?? ''}
                   onChange={(e) => handleChange('address', e.target.value)}
                   className="mt-1 block w-full rounded-lg border border-gray-200 px-3 py-2 focus:border-primary focus:ring-primary dark:border-gray-700 dark:bg-gray-800"
                 />
@@ -147,7 +147,7 @@ export function CustomerCreateModal({ isOpen, onClose, onSuccess }: CustomerCrea
           <div>
             <label className="text-sm font-medium text-text">支援内容<span className="text-danger">*</span></label>
             <textarea
-              value={customer.support_details}
+              value={customer.support_details ?? ''}
               onChange={(e) => handleChange('support_details', e.target.value)}
               className="mt-1 block w-full rounded-lg border border-gray-200 px-3 py-2 focus:border-primary focus:ring-primary dark:border-gray-700 dark:bg-gray-800"
               rows={4}
