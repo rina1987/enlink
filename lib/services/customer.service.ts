@@ -30,7 +30,8 @@ export class CustomerService {
   static async create(customer: CustomerInsert) {
     const { data, error } = await supabase
       .from('customers')
-      .insert(customer)
+      // Vercelの型推論差異によりnever推論されるケースがあるため安全にキャスト
+      .insert(customer as any)
       .select()
       .single()
 
