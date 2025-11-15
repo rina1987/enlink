@@ -1,5 +1,5 @@
 // 2024年の祝日データ
-export const holidays2024 = {
+export const holidays2024: Record<string, string> = {
   '1-1': '元日',
   '1-8': '成人の日',
   '2-11': '建国記念の日',
@@ -22,7 +22,7 @@ export const holidays2024 = {
 };
 
 // 2025年の祝日データ
-export const holidays2025 = {
+export const holidays2025: Record<string, string> = {
   '1-1': '元日',
   '1-13': '成人の日',
   '2-11': '建国記念の日',
