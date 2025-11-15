@@ -17,9 +17,8 @@ export class SnippetService {
   }
 
   static async create(values: SnippetInsert) {
-    const { data, error } = await supabase
-      .from('snippets')
-      .insert(values as any)
+    const { data, error } = await (supabase.from('snippets') as any)
+      .insert(values)
       .select()
       .single()
 
@@ -28,9 +27,8 @@ export class SnippetService {
   }
 
   static async update(id: string, values: SnippetUpdate) {
-    const { data, error } = await supabase
-      .from('snippets')
-      .update(values as any)
+    const { data, error } = await (supabase.from('snippets') as any)
+      .update(values)
       .eq('id', id)
       .select()
       .single()
