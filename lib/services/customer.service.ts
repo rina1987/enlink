@@ -66,7 +66,7 @@ export class CustomerService {
     customer: Customer,
     description?: string
   ) {
-    const { error } = await supabase.from('activities').insert({
+    const { error } = await (supabase.from('activities') as any).insert({
       type,
       title: `顧客「${customer.company_name}」を登録しました`,
       description,

@@ -91,7 +91,7 @@ export class MeetingService {
     type: 'meeting_created' | 'meeting_updated',
     meeting: Meeting
   ) {
-    const { error } = await supabase.from('activities').insert({
+    const { error } = await (supabase.from('activities') as any).insert({
       type,
       title: `面談「${meeting.title}」を${type === 'meeting_created' ? '記録' : '更新'}しました`,
       customer_id: meeting.customer_id,

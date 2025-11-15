@@ -85,7 +85,7 @@ export class ProjectService {
     type: 'project_created' | 'project_updated',
     project: Project
   ) {
-    const { error } = await supabase.from('activities').insert({
+    const { error } = await (supabase.from('activities') as any).insert({
       type,
       title: `案件「${project.name}」を${type === 'project_created' ? '作成' : '更新'}しました`,
       customer_id: project.customer_id,
