@@ -46,7 +46,7 @@ export class CustomerService {
   static async update(id: string, customer: CustomerUpdate) {
     const { data, error } = await supabase
       .from('customers')
-      .update(customer)
+      .update(customer as any)
       .eq('id', id)
       .select()
       .single()

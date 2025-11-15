@@ -59,7 +59,7 @@ export class ProjectService {
   static async update(id: string, project: ProjectUpdate) {
     const { data, error } = await supabase
       .from('projects')
-      .update(project)
+      .update(project as any)
       .eq('id', id)
       .select()
       .single();

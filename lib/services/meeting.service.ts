@@ -65,7 +65,7 @@ export class MeetingService {
   static async update(id: string, meeting: MeetingUpdate) {
     const { data, error } = await supabase
       .from('meetings')
-      .update(meeting)
+      .update(meeting as any)
       .eq('id', id)
       .select()
       .single();

@@ -31,7 +31,7 @@ export class ProjectTaskService {
   static async update(id: string, task: ProjectTaskUpdate) {
     const { data, error } = await supabase
       .from('project_tasks')
-      .update(task)
+      .update(task as any)
       .eq('id', id)
       .select()
       .single()

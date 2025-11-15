@@ -30,7 +30,7 @@ export class SnippetService {
   static async update(id: string, values: SnippetUpdate) {
     const { data, error } = await supabase
       .from('snippets')
-      .update(values)
+      .update(values as any)
       .eq('id', id)
       .select()
       .single()
