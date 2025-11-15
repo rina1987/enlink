@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -11,7 +11,7 @@ import { TaskCreateModal } from '../components/projects/TaskCreateModal';
 import { Project } from '@/lib/services/project.service';
 import { TaskEditModal } from '../components/projects/TaskEditModal';
 
-export default function ProjectsPage() {
+function ProjectsPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<'month' | 'week'>('month');
   const [projects, setProjects] = useState<any[]>([]);
@@ -826,5 +826,26 @@ export default function ProjectsPage() {
         )}
       </div>
     </DashboardLayout>
+  );
+}
+
+export default function ProjectsPageWithSuspense() {
+  return (
+    <Suspense
+      fallback={
+        <DashboardLayout>
+          <div className="flex flex-col">
+            <Card className="p-8 flex items-center justify-center">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                <p className="mt-2 text-text-light">読み込み中...</p>
+              </div>
+            </Card>
+          </div>
+        </DashboardLayout>
+      }
+    >
+      <ProjectsPage />
+    </Suspense>
   );
 }
