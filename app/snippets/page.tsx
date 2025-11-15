@@ -22,9 +22,15 @@ export default function SnippetsPage() {
 
   const loadSnippets = async () => {
     try {
-      const data = await SnippetService.getAll();
-      setSnippets(data);
-      if (data.length > 0 && !selectedSnippetId) setSelectedSnippetId(data[0].id);
+      const data = (await SnippetService.getAll()) as any[];
+      const typed = (data ?? []) as Snippet[];
+      setSnippets(typed);
+      if (!selectedSnippetId && typed.length > 0) {
+        const first = typed[0] as Partial<Snippet>;
+        if (first && typeof first.id === 'string') {
+          setSelectedSnippetId(first.id);
+        }
+      }
     } catch (e) {
       console.error('Failed to load snippets', e);
     }
