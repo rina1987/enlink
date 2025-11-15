@@ -42,9 +42,8 @@ export class ProjectService {
   }
 
   static async create(project: ProjectInsert) {
-    const { data, error } = await supabase
-      .from('projects')
-      .insert(project as any)
+    const { data, error } = await (supabase.from('projects') as any)
+      .insert(project)
       .select()
       .single();
 
@@ -57,9 +56,8 @@ export class ProjectService {
   }
 
   static async update(id: string, project: ProjectUpdate) {
-    const { data, error } = await supabase
-      .from('projects')
-      .update(project as any)
+    const { data, error } = await (supabase.from('projects') as any)
+      .update(project)
       .eq('id', id)
       .select()
       .single();
