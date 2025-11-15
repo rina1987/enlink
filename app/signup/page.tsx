@@ -49,7 +49,10 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-4">
+    <div className="min-h-screen relative flex items-center justify-center bg-gradient-to-br from-indigo-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-4">
+      <div className="absolute right-6 top-6">
+        <Button variant="outline" onClick={() => router.push('/')}>戻る</Button>
+      </div>
       <Card className="w-full max-w-md">
         <div className="p-6">
           <h1 className="text-2xl font-semibold text-text mb-6 text-center">アカウント作成</h1>
@@ -84,7 +87,7 @@ export default function SignupPage() {
               />
             </div>
             <Button type="submit" disabled={loading || !email || !password} className="w-full">
-              {loading ? '作成中…' : '無料で始める'}
+              {loading ? '作成中…' : 'はじめる'}
             </Button>
             {info && <p className="text-xs text-center text-text-light mt-3">{info}</p>}
           </form>
