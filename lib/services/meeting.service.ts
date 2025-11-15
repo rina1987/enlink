@@ -48,9 +48,8 @@ export class MeetingService {
   }
 
   static async create(meeting: MeetingInsert) {
-    const { data, error } = await supabase
-      .from('meetings')
-      .insert(meeting as any)
+    const { data, error } = await (supabase.from('meetings') as any)
+      .insert(meeting)
       .select()
       .single();
 
