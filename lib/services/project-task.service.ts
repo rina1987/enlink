@@ -18,9 +18,8 @@ export class ProjectTaskService {
   }
 
   static async create(task: ProjectTaskInsert) {
-    const { data, error } = await supabase
-      .from('project_tasks')
-      .insert(task as any)
+    const { data, error } = await (supabase.from('project_tasks') as any)
+      .insert(task)
       .select()
       .single()
 
@@ -29,9 +28,8 @@ export class ProjectTaskService {
   }
 
   static async update(id: string, task: ProjectTaskUpdate) {
-    const { data, error } = await supabase
-      .from('project_tasks')
-      .update(task as any)
+    const { data, error } = await (supabase.from('project_tasks') as any)
+      .update(task)
       .eq('id', id)
       .select()
       .single()
