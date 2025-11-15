@@ -28,10 +28,8 @@ export class CustomerService {
   }
 
   static async create(customer: CustomerInsert) {
-    const { data, error } = await supabase
-      .from('customers')
-      // Vercelの型推論差異によりnever推論されるケースがあるため安全にキャスト
-      .insert(customer as any)
+    const { data, error } = await (supabase.from('customers') as any)
+      .insert(customer)
       .select()
       .single()
 
@@ -44,9 +42,8 @@ export class CustomerService {
   }
 
   static async update(id: string, customer: CustomerUpdate) {
-    const { data, error } = await supabase
-      .from('customers')
-      .update(customer as any)
+    const { data, error } = await (supabase.from('customers') as any)
+      .update(customer)
       .eq('id', id)
       .select()
       .single()
