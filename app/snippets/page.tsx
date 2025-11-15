@@ -230,8 +230,9 @@ export default function SnippetsPage() {
                       await loadSnippets();
                       // 選択中が削除されたら先頭に切り替え
                       if (selectedSnippetId === deletingId) {
-                        const latest = (await SnippetService.getAll())[0];
-                        setSelectedSnippetId(latest ? latest.id : null);
+                        const list = (await SnippetService.getAll()) as any[];
+                        const first = (list ?? [])[0] as { id?: string } | undefined;
+                        setSelectedSnippetId(first?.id ?? null);
                       }
                     } catch (e) {
                       console.error('Failed to delete snippet', e);
