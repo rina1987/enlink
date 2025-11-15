@@ -20,7 +20,7 @@ export class ProjectTaskService {
   static async create(task: ProjectTaskInsert) {
     const { data, error } = await supabase
       .from('project_tasks')
-      .insert(task)
+      .insert(task as any)
       .select()
       .single()
 

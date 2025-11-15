@@ -44,7 +44,7 @@ export class ProjectService {
   static async create(project: ProjectInsert) {
     const { data, error } = await supabase
       .from('projects')
-      .insert(project)
+      .insert(project as any)
       .select()
       .single();
 

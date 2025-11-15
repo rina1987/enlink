@@ -19,7 +19,7 @@ export class SnippetService {
   static async create(values: SnippetInsert) {
     const { data, error } = await supabase
       .from('snippets')
-      .insert(values)
+      .insert(values as any)
       .select()
       .single()
 
