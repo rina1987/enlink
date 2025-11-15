@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
 import { DashboardLayout } from '../components/layout/DashboardLayout';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -8,7 +8,7 @@ import { MeetingService } from '@/lib/services/meeting.service';
 import { useSearchParams } from 'next/navigation';
 import { Input } from '../components/ui/Input';
 
-export default function MeetingsPage() {
+function MeetingsPage() {
   const [meetings, setMeetings] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [sortMode, setSortMode] = useState<'latest' | 'project'>('latest');
@@ -309,6 +309,28 @@ export default function MeetingsPage() {
         )}
       </div>
     </DashboardLayout>
+  );
+}
+
+export default function MeetingsPageWithSuspense() {
+  // useSearchParams を使うコンポーネントを Suspense で包む
+  return (
+    <Suspense
+      fallback={
+        <DashboardLayout>
+          <div className="flex flex-col">
+            <Card className="p-8 flex items-center justify-center">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                <p className="mt-2 text-text-light">読み込み中...</p>
+              </div>
+            </Card>
+          </div>
+        </DashboardLayout>
+      }
+    >
+      <MeetingsPage />
+    </Suspense>
   );
 }
 
